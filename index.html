@@ -68,7 +68,7 @@
       <button onclick="mudarMes(-1)" class="p-1.5 text-zinc-400 hover:text-white hover:bg-[#262626] rounded">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <button onclick="irParaMesAtual()" title="Clique para voltar ao mês atual" id="labelMesAno" class="text-sm font-semibold text-white px-2 py-1 min-w-[125px] text-center hover:bg-[#1f1f23] rounded transition capitalize">
+      <button onclick="irParaMesAtual()" title="Clique para voltar ao mês atual" id="labelMesAno" class="text-xs sm:text-sm font-semibold text-white px-2 py-1 min-w-[115px] sm:min-w-[125px] text-center hover:bg-[#1f1f23] rounded transition capitalize">
         Outubro 2026
       </button>
       <button onclick="mudarMes(1)" class="p-1.5 text-zinc-400 hover:text-white hover:bg-[#262626] rounded">
@@ -101,6 +101,18 @@
 
     <!-- Opções do Menu -->
     <div class="flex-1 overflow-y-auto p-4 space-y-6">
+
+      <!-- EXTRATO GERAL COMPLETO (HISTÓRICO SIMPLIFICADO & EDIÇÃO) -->
+      <div>
+        <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Histórico & Extrato</h3>
+        <button onclick="abrirModalExtratoCompleto(); toggleMenu();" class="w-full text-left px-3 py-3 text-sm text-white hover:bg-[#1e1e24] rounded-lg flex items-center justify-between border border-[#262626] bg-[#18181b] transition shadow">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="font-bold">Extrato Geral Completo</span>
+          </div>
+          <span id="badgeTotalExtratoMenu" class="text-xs bg-[#262626] px-2 py-0.5 rounded text-zinc-300 font-mono">0</span>
+        </button>
+      </div>
       
       <!-- DESPESAS RECORRENTES -->
       <div>
@@ -144,101 +156,76 @@
 
     <!-- Rodapé do Menu -->
     <div class="p-4 border-t border-[#262626] bg-[#0a0a0a] text-xs text-zinc-500 flex justify-between items-center">
-      <span>Status: <span id="statusModoTexto" class="text-green-500 font-semibold">Local (Offline)</span></span>
+      <span>Status: <span id="statusModoTexto" class="text-green-500 font-semibold">Conectado à Planilha</span></span>
       <button onclick="limparTudo()" class="text-zinc-600 hover:text-red-400 transition">Resetar Dados</button>
     </div>
   </aside>
 
   <!-- ==================== CONTEÚDO PRINCIPAL ==================== -->
-  <main class="flex-1 max-w-5xl w-full mx-auto p-4 space-y-6 pb-28">
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 space-y-4 sm:space-y-5 pb-24 sm:pb-16">
 
     <!-- CARDS DE SALDOS (MÊS E TOTAL) -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
       <!-- Saldo do Mês -->
-      <div class="bg-[#121212] border border-[#262626] p-4 rounded-xl flex flex-col justify-between">
-        <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Saldo do Mês</span>
-        <div id="cardSaldoMes" class="text-xl sm:text-2xl font-bold font-mono mt-1 text-white">R$ 0,00</div>
-        <div class="text-[11px] text-zinc-500 mt-2">Receitas - Despesas do mês</div>
+      <div class="bg-[#121212] border border-[#262626] p-3.5 sm:p-4 rounded-xl flex flex-col justify-between">
+        <span class="text-[11px] sm:text-xs font-medium text-zinc-400 uppercase tracking-wider">Saldo do Mês</span>
+        <div id="cardSaldoMes" class="text-lg sm:text-2xl font-bold font-mono mt-1 text-white">R$ 0,00</div>
+        <div class="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5">Receitas - Despesas do mês</div>
       </div>
 
       <!-- Saldo Total (Acumulado) -->
-      <div class="bg-[#121212] border border-[#262626] p-4 rounded-xl flex flex-col justify-between">
-        <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Saldo Total</span>
-        <div id="cardSaldoTotal" class="text-xl sm:text-2xl font-bold font-mono mt-1 text-white">R$ 0,00</div>
-        <div class="text-[11px] text-zinc-500 mt-2">Histórico geral acumulado</div>
+      <div class="bg-[#121212] border border-[#262626] p-3.5 sm:p-4 rounded-xl flex flex-col justify-between">
+        <span class="text-[11px] sm:text-xs font-medium text-zinc-400 uppercase tracking-wider">Saldo Total</span>
+        <div id="cardSaldoTotal" class="text-lg sm:text-2xl font-bold font-mono mt-1 text-white">R$ 0,00</div>
+        <div class="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5">Histórico geral acumulado</div>
       </div>
 
       <!-- Total Entradas do Mês -->
-      <div class="bg-[#121212] border border-[#262626] p-4 rounded-xl flex flex-col justify-between">
-        <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Entradas do Mês</span>
-        <div id="cardTotalReceitas" class="text-lg sm:text-xl font-bold font-mono mt-1 text-green-500">R$ 0,00</div>
-        <div class="text-[11px] text-zinc-500 mt-2" id="subRecRealizadas">0 lançamentos</div>
+      <div class="bg-[#121212] border border-[#262626] p-3.5 sm:p-4 rounded-xl flex flex-col justify-between">
+        <span class="text-[11px] sm:text-xs font-medium text-zinc-400 uppercase tracking-wider">Entradas do Mês</span>
+        <div id="cardTotalReceitas" class="text-base sm:text-xl font-bold font-mono mt-1 text-green-500">R$ 0,00</div>
+        <div class="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5" id="subRecRealizadas">0 lançamentos</div>
       </div>
 
       <!-- Total Saídas do Mês -->
-      <div class="bg-[#121212] border border-[#262626] p-4 rounded-xl flex flex-col justify-between">
-        <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Saídas do Mês</span>
-        <div id="cardTotalDespesas" class="text-lg sm:text-xl font-bold font-mono mt-1 text-red-500">R$ 0,00</div>
-        <div class="text-[11px] text-zinc-500 mt-2" id="subDespRealizadas">0 lançamentos</div>
+      <div class="bg-[#121212] border border-[#262626] p-3.5 sm:p-4 rounded-xl flex flex-col justify-between">
+        <span class="text-[11px] sm:text-xs font-medium text-zinc-400 uppercase tracking-wider">Saídas do Mês</span>
+        <div id="cardTotalDespesas" class="text-base sm:text-xl font-bold font-mono mt-1 text-red-500">R$ 0,00</div>
+        <div class="text-[10px] sm:text-[11px] text-zinc-500 mt-1.5" id="subDespRealizadas">0 lançamentos</div>
       </div>
     </div>
 
-    <!-- PROJEÇÃO MÊS SEGUINTE -->
-    <div class="bg-[#121212] border border-[#262626] rounded-xl p-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-3 border-b border-[#262626] gap-2">
-        <div>
-          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-200">
-            Projeção Mês Seguinte (<span id="nomeProximoMes" class="capitalize">Próximo</span>)
-          </h2>
-          <p class="text-xs text-zinc-500">Projeção estimada a partir dos cadastros recorrentes ativos</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-zinc-400">Resultado Previsto:</span>
-          <span id="projResultado" class="text-sm font-bold font-mono px-2.5 py-1 rounded bg-[#0a0a0a] border border-[#262626]">R$ 0,00</span>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-        <div class="bg-[#0a0a0a] p-3 rounded-lg border border-[#262626] flex justify-between items-center">
-          <span class="text-zinc-400 text-xs uppercase font-medium">Projeção Recebimento</span>
-          <span id="projRecebimentos" class="font-mono font-bold text-green-500">R$ 0,00</span>
-        </div>
-        <div class="bg-[#0a0a0a] p-3 rounded-lg border border-[#262626] flex justify-between items-center">
-          <span class="text-zinc-400 text-xs uppercase font-medium">Projeção Despesa</span>
-          <span id="projDespesas" class="font-mono font-bold text-red-500">R$ 0,00</span>
-        </div>
-        <div class="bg-[#0a0a0a] p-3 rounded-lg border border-[#262626] flex justify-between items-center">
-          <span class="text-zinc-400 text-xs uppercase font-medium">Projeção Resultado</span>
-          <span id="projResultadoCard" class="font-mono font-bold text-white">R$ 0,00</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- BOTÕES PRINCIPAIS DE LANÇAMENTO -->
-    <div class="grid grid-cols-2 gap-3">
+    <!-- BOTÕES PRINCIPAIS DE LANÇAMENTO (LOGO NO TOPO, SEM PRECISAR ROLAR) -->
+    <div class="grid grid-cols-2 gap-2.5 sm:gap-3">
       <!-- Botão Recebimento -->
-      <button onclick="abrirModalLancamento('recebimento')" class="bg-[#16a34a] hover:bg-[#15803d] active:bg-[#166534] text-white p-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        <span>+ Recebimento</span>
+      <button onclick="abrirModalLancamento('recebimento')" class="bg-[#16a34a] hover:bg-[#15803d] active:bg-[#166534] text-white py-3 sm:py-3.5 px-3 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        <span class="text-sm sm:text-base">+ Recebimento</span>
       </button>
 
       <!-- Botão Despesa -->
-      <button onclick="abrirModalLancamento('despesa')" class="bg-[#dc2626] hover:bg-[#b91c1c] active:bg-[#991b1b] text-white p-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
-        <span>- Despesa</span>
+      <button onclick="abrirModalLancamento('despesa')" class="bg-[#dc2626] hover:bg-[#b91c1c] active:bg-[#991b1b] text-white py-3 sm:py-3.5 px-3 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+        <span class="text-sm sm:text-base">- Despesa</span>
       </button>
     </div>
 
-    <!-- EXTRATO / LANÇAMENTOS E CONCILIAÇÃO -->
+    <!-- EXTRATO / LANÇAMENTOS DO MÊS E CONCILIAÇÃO -->
     <div class="bg-[#121212] border border-[#262626] rounded-xl overflow-hidden">
-      <div class="p-4 border-b border-[#262626] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-2">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-200">Lançamentos do Mês</h2>
-          <span id="badgeTotalLancamentos" class="text-xs bg-[#262626] text-zinc-300 px-2 py-0.5 rounded-full font-mono">0</span>
+      <div class="p-3.5 sm:p-4 border-b border-[#262626] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center justify-between sm:justify-start gap-2">
+          <div class="flex items-center gap-2">
+            <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-200">Lançamentos do Mês</h2>
+            <span id="badgeTotalLancamentos" class="text-xs bg-[#262626] text-zinc-300 px-2 py-0.5 rounded-full font-mono">0</span>
+          </div>
+          <!-- Atalho para Extrato Completo -->
+          <button onclick="abrirModalExtratoCompleto()" class="text-xs text-zinc-400 hover:text-white sm:hidden flex items-center gap-1 underline underline-offset-4">
+            Ver Todos
+          </button>
         </div>
 
         <!-- Filtros Rápidos de Situação -->
-        <div class="flex items-center gap-2 text-xs">
+        <div class="flex items-center gap-1.5 sm:gap-2 text-xs">
           <button onclick="filtrarStatus('todos')" id="filterTodos" class="px-2.5 py-1 rounded bg-white text-black font-semibold">Todos</button>
           <button onclick="filtrarStatus('conciliado')" id="filterConciliado" class="px-2.5 py-1 rounded bg-[#262626] text-zinc-300 hover:text-white">Conciliados</button>
           <button onclick="filtrarStatus('pendente')" id="filterPendente" class="px-2.5 py-1 rounded bg-[#262626] text-zinc-300 hover:text-white">Pendentes</button>
@@ -253,9 +240,52 @@
         Nenhum lançamento registrado neste mês. Utilize os botões acima para lançar recebimentos ou despesas.
       </div>
     </div>
+
+    <!-- PROJEÇÃO MÊS SEGUINTE -->
+    <div class="bg-[#121212] border border-[#262626] rounded-xl p-3.5 sm:p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-3 border-b border-[#262626] gap-2">
+        <div>
+          <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-200">
+            Projeção Mês Seguinte (<span id="nomeProximoMes" class="capitalize">Próximo</span>)
+          </h2>
+          <p class="text-[11px] sm:text-xs text-zinc-500">Estimado a partir dos cadastros recorrentes ativos</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-zinc-400">Resultado Previsto:</span>
+          <span id="projResultado" class="text-xs sm:text-sm font-bold font-mono px-2.5 py-1 rounded bg-[#0a0a0a] border border-[#262626]">R$ 0,00</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-sm">
+        <div class="bg-[#0a0a0a] p-3 rounded-lg border border-[#262626] flex justify-between items-center">
+          <span class="text-zinc-400 text-xs uppercase font-medium">Projeção Recebimento</span>
+          <span id="projRecebimentos" class="font-mono font-bold text-green-500">R$ 0,00</span>
+        </div>
+        <div class="bg-[#0a0a0a] p-3 rounded-lg border border-[#262626] flex justify-between items-center">
+          <span class="text-zinc-400 text-xs uppercase font-medium">Projeção Despesa</span>
+          <span id="projDespesas" class="font-mono font-bold text-red-500">R$ 0,00</span>
+        </div>
+        <div class="bg-[#0a0a0a] p-3 rounded-lg border border-[#262626] flex justify-between items-center">
+          <span class="text-zinc-400 text-xs uppercase font-medium">Projeção Resultado</span>
+          <span id="projResultadoCard" class="font-mono font-bold text-white">R$ 0,00</span>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <!-- ==================== MODAL: LANÇAMENTO (RECEBIMENTO / DESPESA) ==================== -->
+  <!-- ==================== BARRA FIXA MOBILE INFERIOR ==================== -->
+  <div class="fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-[#262626] p-2.5 sm:hidden z-30 flex gap-2 shadow-2xl">
+    <button onclick="abrirModalLancamento('recebimento')" class="flex-1 bg-[#16a34a] active:bg-[#15803d] text-white py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 text-sm shadow">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+      <span>+ Entrada</span>
+    </button>
+    <button onclick="abrirModalLancamento('despesa')" class="flex-1 bg-[#dc2626] active:bg-[#b91c1c] text-white py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 text-sm shadow">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+      <span>- Saída</span>
+    </button>
+  </div>
+
+  <!-- ==================== MODAL: LANÇAMENTO NOVO ==================== -->
   <div id="modalLancamento" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4">
     <div class="bg-[#121212] border border-[#262626] rounded-xl max-w-md w-full overflow-hidden shadow-2xl">
       <div id="modalHeaderLancamento" class="p-4 border-b border-[#262626] flex justify-between items-center bg-[#0a0a0a]">
@@ -268,7 +298,6 @@
       <form id="formLancamento" onsubmit="salvarLancamento(event)" class="p-4 space-y-4">
         <input type="hidden" id="lancTipo" value="despesa">
 
-        <!-- Alternar entre Cadastrado (dropdown) e Manual -->
         <div>
           <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Origem do Lançamento</label>
           <div class="grid grid-cols-2 gap-2 mb-2">
@@ -276,7 +305,6 @@
             <button type="button" onclick="setOrigemLancamento('manual')" id="btnOrigemManual" class="py-2 text-xs font-semibold rounded-lg border border-[#262626] text-zinc-400">Lançamento Manual</button>
           </div>
 
-          <!-- Dropdown de Cadastrados -->
           <div id="campoCadastrado" class="space-y-1">
             <select id="selectCadastrado" onchange="selecionouRecorrente()" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
               <option value="">Selecione um item pré-cadastrado...</option>
@@ -284,13 +312,11 @@
           </div>
         </div>
 
-        <!-- Descrição -->
         <div>
           <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Descrição</label>
-          <input type="text" id="lancDescricao" required placeholder="Ex: Supermercado, Salário, Internet" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+          <input type="text" id="lancDescricao" required placeholder="Ex: Salário, Aluguel, Supermercado" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
         </div>
 
-        <!-- Valor e Categoria -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Valor (R$)</label>
@@ -298,11 +324,10 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Categoria</label>
-            <input type="text" id="lancCategoria" placeholder="Ex: Moradia, Alimentação" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+            <input type="text" id="lancCategoria" placeholder="Ex: Renda, Moradia" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
           </div>
         </div>
 
-        <!-- Data do Lançamento e Situação -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Data</label>
@@ -317,12 +342,117 @@
           </div>
         </div>
 
-        <!-- Botões de Ação -->
         <div class="flex justify-end space-x-2 pt-3 border-t border-[#262626]">
           <button type="button" onclick="fecharModalLancamento()" class="px-4 py-2 text-sm text-zinc-400 hover:text-white">Cancelar</button>
           <button type="submit" id="btnSalvarLanc" class="px-5 py-2 text-sm font-bold bg-white text-black hover:bg-zinc-200 rounded-lg">Salvar Lançamento</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: EDITAR LANÇAMENTO (EXTRATO / EDIÇÃO COMPLETA) ==================== -->
+  <div id="modalEditarLancamento" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4">
+    <div class="bg-[#121212] border border-[#262626] rounded-xl max-w-md w-full overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-[#262626] flex justify-between items-center bg-[#0a0a0a]">
+        <h3 class="text-base font-bold text-white uppercase tracking-wider">Editar Lançamento</h3>
+        <button onclick="fecharModalEditar()" class="text-zinc-400 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="formEditarLancamento" onsubmit="salvarEdicaoLancamento(event)" class="p-4 space-y-4">
+        <input type="hidden" id="editLancId">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Tipo</label>
+            <select id="editLancTipo" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+              <option value="recebimento">Recebimento (Entrada)</option>
+              <option value="despesa">Despesa (Saída)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Situação</label>
+            <select id="editLancStatus" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+              <option value="conciliado">Realizado / Pago</option>
+              <option value="pendente">Pendente</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Descrição</label>
+          <input type="text" id="editLancDescricao" required class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Valor (R$)</label>
+            <input type="number" step="0.01" min="0.01" id="editLancValor" required class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white font-mono focus:outline-none focus:border-zinc-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Categoria</label>
+            <input type="text" id="editLancCategoria" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Data do Lançamento</label>
+          <input type="date" id="editLancData" required class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+        </div>
+
+        <div class="flex justify-between items-center pt-3 border-t border-[#262626]">
+          <button type="button" onclick="excluirLancamentoDoModalEdicao()" class="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            <span>Excluir</span>
+          </button>
+          <div class="flex space-x-2">
+            <button type="button" onclick="fecharModalEditar()" class="px-4 py-2 text-sm text-zinc-400 hover:text-white">Cancelar</button>
+            <button type="submit" class="px-5 py-2 text-sm font-bold bg-white text-black hover:bg-zinc-200 rounded-lg">Salvar Alterações</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: EXTRATO GERAL COMPLETO ==================== -->
+  <div id="modalExtratoCompleto" class="fixed inset-0 z-50 bg-black/85 hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#121212] border border-[#262626] rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      <!-- Topo Extrato -->
+      <div class="p-4 border-b border-[#262626] flex justify-between items-center bg-[#0a0a0a]">
+        <div>
+          <h3 class="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Extrato Geral Completo
+          </h3>
+          <p class="text-xs text-zinc-500">Histórico de todas as entradas e saídas. Clique em Editar para alterar qualquer lançamento.</p>
+        </div>
+        <button onclick="fecharModalExtratoCompleto()" class="text-zinc-400 hover:text-white p-1">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Filtros do Extrato -->
+      <div class="p-3 bg-[#18181b] border-b border-[#262626] space-y-2.5">
+        <div class="flex gap-2">
+          <input type="text" id="buscaExtrato" oninput="renderizarExtratoCompleto()" placeholder="Buscar por descrição ou categoria..." class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400">
+        </div>
+        <div class="flex items-center justify-between text-xs flex-wrap gap-2">
+          <div class="flex gap-1">
+            <button onclick="filtrarTipoExtrato('todos')" id="btnExtratoTipoTodos" class="px-2.5 py-1 rounded bg-white text-black font-semibold">Todos</button>
+            <button onclick="filtrarTipoExtrato('recebimento')" id="btnExtratoTipoRec" class="px-2.5 py-1 rounded bg-[#262626] text-zinc-300 hover:text-white">Entradas</button>
+            <button onclick="filtrarTipoExtrato('despesa')" id="btnExtratoTipoDesp" class="px-2.5 py-1 rounded bg-[#262626] text-zinc-300 hover:text-white">Saídas</button>
+          </div>
+          <div id="resumoExtratoFiltrado" class="text-zinc-400 font-mono text-[11px]">
+            0 itens
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista do Extrato Geral -->
+      <div id="listaItensExtratoCompleto" class="flex-1 overflow-y-auto divide-y divide-[#262626] p-2">
+        <!-- Injetado via Javascript -->
+      </div>
     </div>
   </div>
 
@@ -344,7 +474,6 @@
           <input type="text" id="recDescricao" required placeholder="Ex: Aluguel, Academia, Salário Empresa" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
         </div>
 
-        <!-- Checkbox: Sem Valor Fixo (Com ou Sem Valor) -->
         <div id="containerSemValor" class="flex items-center space-x-2 py-1">
           <input type="checkbox" id="recSemValorFixo" onchange="toggleValorFixo()" class="w-4 h-4 rounded bg-[#0a0a0a] border-[#262626] text-white focus:ring-0">
           <label for="recSemValorFixo" class="text-xs text-zinc-300">Despesa sem valor fixo (o valor varia a cada mês, ex: Energia, Cartão)</label>
@@ -422,6 +551,7 @@
       mesVisualizado: new Date().getMonth(),
       anoVisualizado: new Date().getFullYear(),
       filtroStatus: 'todos',
+      filtroExtratoTipo: 'todos',
       lancamentos: [],
       recorrentes: [],
       sheetsUrl: localStorage.getItem('financas_sheets_url') || 'https://script.google.com/macros/s/AKfycbwY5Pyyv_1IsgNW8YU6ExYqZFylYnviMgHRKzytW8DHQiIb4735o5GuKTDvqdyABw4T/exec',
@@ -433,6 +563,82 @@
       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ];
 
+    // ==================== PARSER ROBUSTO DE DATAS ====================
+    // Converte qualquer formato vindo do Google Sheets, inputs ou LocalStorage em { ano, mes, dia, strYMD, strBR }
+    function normalizarData(dInput) {
+      if (!dInput) {
+        const h = new Date();
+        const y = h.getFullYear(), m = h.getMonth(), d = h.getDate();
+        return {
+          ano: y, mes: m, dia: d,
+          strYMD: `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+          strBR: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}`,
+          strBRCompleta: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}/${y}`
+        };
+      }
+
+      if (dInput instanceof Date && !isNaN(dInput.getTime())) {
+        const y = dInput.getFullYear(), m = dInput.getMonth(), d = dInput.getDate();
+        return {
+          ano: y, mes: m, dia: d,
+          strYMD: `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+          strBR: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}`,
+          strBRCompleta: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}/${y}`
+        };
+      }
+
+      const str = String(dInput).trim();
+      
+      // Formato YYYY-MM-DD
+      const matchYMD = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (matchYMD) {
+        const y = parseInt(matchYMD[1], 10);
+        const m = parseInt(matchYMD[2], 10) - 1;
+        const d = parseInt(matchYMD[3], 10);
+        return {
+          ano: y, mes: m, dia: d,
+          strYMD: `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+          strBR: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}`,
+          strBRCompleta: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}/${y}`
+        };
+      }
+
+      // Formato DD/MM/YYYY
+      const matchDMY = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (matchDMY) {
+        const d = parseInt(matchDMY[1], 10);
+        const m = parseInt(matchDMY[2], 10) - 1;
+        const y = parseInt(matchDMY[3], 10);
+        return {
+          ano: y, mes: m, dia: d,
+          strYMD: `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+          strBR: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}`,
+          strBRCompleta: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}/${y}`
+        };
+      }
+
+      // String de data completa (ex: "Sun Oct 18 2026 00:00:00 GMT-0300...")
+      const parsed = new Date(str);
+      if (!isNaN(parsed.getTime())) {
+        const y = parsed.getFullYear(), m = parsed.getMonth(), d = parsed.getDate();
+        return {
+          ano: y, mes: m, dia: d,
+          strYMD: `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+          strBR: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}`,
+          strBRCompleta: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}/${y}`
+        };
+      }
+
+      const h = new Date();
+      const y = h.getFullYear(), m = h.getMonth(), d = h.getDate();
+      return {
+        ano: y, mes: m, dia: d,
+        strYMD: `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+        strBR: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}`,
+        strBRCompleta: `${String(d).padStart(2, '0')}/${String(m + 1).padStart(2, '0')}/${y}`
+      };
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       carregarDadosLocais();
       definirDataPadrao();
@@ -443,7 +649,6 @@
         sincronizarComPlanilha(true);
       }
 
-      // Registro do Service Worker
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW register error:', err));
       }
@@ -452,18 +657,17 @@
     function carregarDadosLocais() {
       const lancSalvos = localStorage.getItem('financas_lancamentos');
       const recSalvos = localStorage.getItem('financas_recorrentes');
-      if (lancSalvos) estado.lancamentos = JSON.parse(lancSalvos);
-      if (recSalvos) estado.recorrentes = JSON.parse(recSalvos);
-
-      if (estado.recorrentes.length === 0 && estado.lancamentos.length === 0) {
-        // Exemplo inicial de recorrentes
-        estado.recorrentes = [
-          { id: 'R_1', tipo: 'recebimento', descricao: 'Salário', categoria: 'Renda', valor: 5500, semValorFixo: false, diaVencimento: 5, ativo: true },
-          { id: 'R_2', tipo: 'despesa', descricao: 'Aluguel', categoria: 'Moradia', valor: 1800, semValorFixo: false, diaVencimento: 10, ativo: true },
-          { id: 'R_3', tipo: 'despesa', descricao: 'Conta de Luz', categoria: 'Contas', valor: 220, semValorFixo: true, diaVencimento: 15, ativo: true },
-          { id: 'R_4', tipo: 'despesa', descricao: 'Internet', categoria: 'Serviços', valor: 130, semValorFixo: false, diaVencimento: 20, ativo: true }
-        ];
-        salvarDadosLocais();
+      if (lancSalvos) {
+        try {
+          const lParsed = JSON.parse(lancSalvos);
+          estado.lancamentos = lParsed.map(l => {
+            l.data = normalizarData(l.data).strYMD;
+            return l;
+          });
+        } catch(e) {}
+      }
+      if (recSalvos) {
+        try { estado.recorrentes = JSON.parse(recSalvos); } catch(e) {}
       }
     }
 
@@ -473,7 +677,7 @@
     }
 
     function definirDataPadrao() {
-      const hoje = new Date().toISOString().split('T')[0];
+      const hoje = normalizarData(new Date()).strYMD;
       document.getElementById('lancData').value = hoje;
     }
 
@@ -494,8 +698,9 @@
     }
 
     function irParaMesAtual() {
-      estado.mesVisualizado = new Date().getMonth();
-      estado.anoVisualizado = new Date().getFullYear();
+      const h = new Date();
+      estado.mesVisualizado = h.getMonth();
+      estado.anoVisualizado = h.getFullYear();
       renderizarTudo();
     }
 
@@ -513,9 +718,10 @@
     function renderizarTudo() {
       document.getElementById('labelMesAno').innerText = `${MESES[estado.mesVisualizado]} ${estado.anoVisualizado}`;
 
+      // Filtra lançamentos do mês usando o normalizador
       const lancamentosMes = estado.lancamentos.filter(l => {
-        const d = new Date(l.data + 'T00:00:00');
-        return d.getMonth() === estado.mesVisualizado && d.getFullYear() === estado.anoVisualizado;
+        const info = normalizarData(l.data);
+        return info.mes === estado.mesVisualizado && info.ano === estado.anoVisualizado;
       });
 
       let recMes = 0;
@@ -525,10 +731,10 @@
 
       lancamentosMes.forEach(l => {
         if (l.tipo === 'recebimento') {
-          recMes += l.valor;
+          recMes += (Number(l.valor) || 0);
           countRec++;
         } else {
-          despMes += l.valor;
+          despMes += (Number(l.valor) || 0);
           countDesp++;
         }
       });
@@ -536,7 +742,7 @@
       const saldoMes = recMes - despMes;
       const elSaldoMes = document.getElementById('cardSaldoMes');
       elSaldoMes.innerText = formatarMoeda(saldoMes);
-      elSaldoMes.className = `text-xl sm:text-2xl font-bold font-mono mt-1 ${saldoMes >= 0 ? 'text-green-500' : 'text-red-500'}`;
+      elSaldoMes.className = `text-lg sm:text-2xl font-bold font-mono mt-1 ${saldoMes >= 0 ? 'text-green-500' : 'text-red-500'}`;
 
       document.getElementById('cardTotalReceitas').innerText = formatarMoeda(recMes);
       document.getElementById('subRecRealizadas').innerText = `${countRec} lançamento(s)`;
@@ -546,17 +752,18 @@
 
       let saldoTotalAcumulado = 0;
       estado.lancamentos.forEach(l => {
-        if (l.tipo === 'recebimento') saldoTotalAcumulado += l.valor;
-        else saldoTotalAcumulado -= l.valor;
+        if (l.tipo === 'recebimento') saldoTotalAcumulado += (Number(l.valor) || 0);
+        else saldoTotalAcumulado -= (Number(l.valor) || 0);
       });
       const elSaldoTotal = document.getElementById('cardSaldoTotal');
       elSaldoTotal.innerText = formatarMoeda(saldoTotalAcumulado);
-      elSaldoTotal.className = `text-xl sm:text-2xl font-bold font-mono mt-1 ${saldoTotalAcumulado >= 0 ? 'text-white' : 'text-red-500'}`;
+      elSaldoTotal.className = `text-lg sm:text-2xl font-bold font-mono mt-1 ${saldoTotalAcumulado >= 0 ? 'text-white' : 'text-red-500'}`;
 
       calcularProjecaoMesSeguinte();
 
       document.getElementById('badgeCountDespesasRec').innerText = estado.recorrentes.filter(r => r.tipo === 'despesa' && r.ativo).length;
       document.getElementById('badgeCountRecebimentosRec').innerText = estado.recorrentes.filter(r => r.tipo === 'recebimento' && r.ativo).length;
+      document.getElementById('badgeTotalExtratoMenu').innerText = estado.lancamentos.length;
 
       renderizarLancamentos();
     }
@@ -575,9 +782,9 @@
 
       estado.recorrentes.filter(r => r.ativo).forEach(r => {
         if (r.tipo === 'recebimento') {
-          projReceitas += (r.valor || 0);
+          projReceitas += (Number(r.valor) || 0);
         } else if (r.tipo === 'despesa') {
-          projDespesas += (r.valor || 0);
+          projDespesas += (Number(r.valor) || 0);
         }
       });
 
@@ -592,10 +799,10 @@
       elResultadoCard.innerText = formatarMoeda(projResultado);
 
       if (projResultado >= 0) {
-        elResultado.className = "text-sm font-bold font-mono px-2.5 py-1 rounded bg-[#0a0a0a] border border-[#262626] text-green-500";
+        elResultado.className = "text-xs sm:text-sm font-bold font-mono px-2.5 py-1 rounded bg-[#0a0a0a] border border-[#262626] text-green-500";
         elResultadoCard.className = "font-mono font-bold text-green-500";
       } else {
-        elResultado.className = "text-sm font-bold font-mono px-2.5 py-1 rounded bg-[#0a0a0a] border border-[#262626] text-red-500";
+        elResultado.className = "text-xs sm:text-sm font-bold font-mono px-2.5 py-1 rounded bg-[#0a0a0a] border border-[#262626] text-red-500";
         elResultadoCard.className = "font-mono font-bold text-red-500";
       }
     }
@@ -606,15 +813,20 @@
       container.innerHTML = '';
 
       let itens = estado.lancamentos.filter(l => {
-        const d = new Date(l.data + 'T00:00:00');
-        return d.getMonth() === estado.mesVisualizado && d.getFullYear() === estado.anoVisualizado;
+        const info = normalizarData(l.data);
+        return info.mes === estado.mesVisualizado && info.ano === estado.anoVisualizado;
       });
 
       if (estado.filtroStatus !== 'todos') {
         itens = itens.filter(l => l.status === estado.filtroStatus);
       }
 
-      itens.sort((a, b) => new Date(b.data) - new Date(a.data));
+      // Ordena por data decrescente
+      itens.sort((a, b) => {
+        const dateA = normalizarData(a.data).strYMD;
+        const dateB = normalizarData(b.data).strYMD;
+        return dateB.localeCompare(dateA);
+      });
 
       document.getElementById('badgeTotalLancamentos').innerText = itens.length;
 
@@ -625,25 +837,25 @@
       estadoVazio.classList.add('hidden');
 
       itens.forEach(item => {
-        const dia = item.data.split('-')[2];
+        const info = normalizarData(item.data);
         const isReceita = item.tipo === 'recebimento';
         const isConciliado = item.status === 'conciliado';
 
         const row = document.createElement('div');
-        row.className = "p-3.5 sm:px-4 flex items-center justify-between hover:bg-[#18181b] transition";
+        row.className = "p-3 sm:px-4 flex items-center justify-between hover:bg-[#18181b] transition gap-2";
         row.innerHTML = `
-          <div class="flex items-center space-x-3">
-            <button onclick="toggleConciliacao('${item.id}')" title="${isConciliado ? 'Conciliado (clique para marcar pendente)' : 'Pendente (clique para conciliar)'}" class="w-7 h-7 rounded border flex items-center justify-center transition ${isConciliado ? 'bg-zinc-800 border-zinc-600 text-white' : 'border-zinc-700 text-transparent hover:text-zinc-600'}">
+          <div class="flex items-center space-x-2.5 sm:space-x-3 overflow-hidden">
+            <button onclick="toggleConciliacao('${item.id}')" title="${isConciliado ? 'Conciliado (clique para marcar pendente)' : 'Pendente (clique para conciliar)'}" class="w-7 h-7 shrink-0 rounded-lg border flex items-center justify-center transition ${isConciliado ? 'bg-zinc-800 border-zinc-600 text-white' : 'border-zinc-700 text-transparent hover:text-zinc-600'}">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
             </button>
 
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-mono text-zinc-500 font-semibold">${dia}/${item.data.split('-')[1]}</span>
-                <span class="text-sm font-semibold text-white">${item.descricao}</span>
-                ${item.origemRecorrente ? '<span class="text-[10px] bg-[#262626] text-zinc-400 px-1 rounded">recorrente</span>' : ''}
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-xs font-mono text-zinc-400 font-semibold">${info.strBR}</span>
+                <span class="text-sm font-semibold text-white truncate max-w-[140px] sm:max-w-xs">${item.descricao}</span>
+                ${item.origemRecorrente ? '<span class="text-[9px] bg-[#262626] text-zinc-400 px-1 py-0.2 rounded">recorrente</span>' : ''}
               </div>
-              <div class="text-xs text-zinc-500 flex items-center gap-2 mt-0.5">
+              <div class="text-[11px] text-zinc-500 flex items-center gap-1.5 mt-0.5">
                 <span>${item.categoria || 'Geral'}</span>
                 <span>•</span>
                 <span class="${isConciliado ? 'text-zinc-400' : 'text-amber-500 font-medium'}">${isConciliado ? 'Conciliado' : 'Pendente'}</span>
@@ -651,11 +863,16 @@
             </div>
           </div>
 
-          <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-2 shrink-0">
             <span class="font-mono text-sm sm:text-base font-bold ${isReceita ? 'text-green-500' : 'text-red-500'}">
               ${isReceita ? '+' : '-'} ${formatarMoeda(item.valor)}
             </span>
-            <button onclick="excluirLancamento('${item.id}')" title="Excluir Lançamento" class="text-zinc-600 hover:text-red-400 p-1">
+            <!-- Botão Editar Direto -->
+            <button onclick="abrirModalEditar('${item.id}')" title="Editar Lançamento" class="text-zinc-500 hover:text-white p-1 rounded hover:bg-[#262626]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            </button>
+            <!-- Botão Excluir -->
+            <button onclick="excluirLancamento('${item.id}')" title="Excluir Lançamento" class="text-zinc-600 hover:text-red-400 p-1 rounded hover:bg-[#262626]">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </button>
           </div>
@@ -670,6 +887,7 @@
         item.status = item.status === 'conciliado' ? 'pendente' : 'conciliado';
         salvarDadosLocais();
         renderizarTudo();
+        renderizarExtratoCompleto();
         autoSyncSilencioso();
       }
     }
@@ -679,10 +897,12 @@
         estado.lancamentos = estado.lancamentos.filter(l => l.id !== id);
         salvarDadosLocais();
         renderizarTudo();
+        renderizarExtratoCompleto();
         autoSyncSilencioso();
       }
     }
 
+    // ==================== MODAL DE LANÇAMENTO NOVO ====================
     function abrirModalLancamento(tipo) {
       document.getElementById('lancTipo').value = tipo;
       const titulo = document.getElementById('modalTituloLancamento');
@@ -698,6 +918,7 @@
 
       popularDropdownRecorrentes(tipo);
       setOrigemLancamento('cadastrado');
+      definirDataPadrao();
       document.getElementById('modalLancamento').classList.remove('hidden');
       document.getElementById('modalLancamento').classList.add('flex');
     }
@@ -760,18 +981,20 @@
       const descricao = document.getElementById('lancDescricao').value.trim();
       const valor = parseFloat(document.getElementById('lancValor').value);
       const categoria = document.getElementById('lancCategoria').value.trim();
-      const data = document.getElementById('lancData').value;
+      const rawData = document.getElementById('lancData').value;
       const status = document.getElementById('lancStatus').value;
       const recId = document.getElementById('selectCadastrado').value;
 
-      if (!descricao || isNaN(valor) || valor <= 0 || !data) {
+      if (!descricao || isNaN(valor) || valor <= 0 || !rawData) {
         alert('Por favor, preencha todos os campos obrigatórios.');
         return;
       }
 
+      const dataNormalizada = normalizarData(rawData).strYMD;
+
       const novoLancamento = {
         id: 'L_' + Date.now(),
-        data,
+        data: dataNormalizada,
         tipo,
         descricao,
         categoria,
@@ -787,6 +1010,181 @@
       autoSyncSilencioso();
     }
 
+    // ==================== MODAL DE EDIÇÃO DE LANÇAMENTO ====================
+    function abrirModalEditar(id) {
+      const item = estado.lancamentos.find(l => l.id === id);
+      if (!item) return;
+
+      document.getElementById('editLancId').value = item.id;
+      document.getElementById('editLancTipo').value = item.tipo;
+      document.getElementById('editLancDescricao').value = item.descricao;
+      document.getElementById('editLancValor').value = item.valor;
+      document.getElementById('editLancCategoria').value = item.categoria || '';
+      document.getElementById('editLancData').value = normalizarData(item.data).strYMD;
+      document.getElementById('editLancStatus').value = item.status || 'conciliado';
+
+      document.getElementById('modalEditarLancamento').classList.remove('hidden');
+      document.getElementById('modalEditarLancamento').classList.add('flex');
+    }
+
+    function fecharModalEditar() {
+      document.getElementById('modalEditarLancamento').classList.add('hidden');
+      document.getElementById('modalEditarLancamento').classList.remove('flex');
+      document.getElementById('formEditarLancamento').reset();
+    }
+
+    function salvarEdicaoLancamento(event) {
+      event.preventDefault();
+      const id = document.getElementById('editLancId').value;
+      const item = estado.lancamentos.find(l => l.id === id);
+      if (!item) return;
+
+      const valor = parseFloat(document.getElementById('editLancValor').value);
+      if (isNaN(valor) || valor <= 0) {
+        alert('Informe um valor válido.');
+        return;
+      }
+
+      item.tipo = document.getElementById('editLancTipo').value;
+      item.descricao = document.getElementById('editLancDescricao').value.trim();
+      item.valor = valor;
+      item.categoria = document.getElementById('editLancCategoria').value.trim();
+      item.data = normalizarData(document.getElementById('editLancData').value).strYMD;
+      item.status = document.getElementById('editLancStatus').value;
+
+      salvarDadosLocais();
+      fecharModalEditar();
+      renderizarTudo();
+      renderizarExtratoCompleto();
+      autoSyncSilencioso();
+    }
+
+    function excluirLancamentoDoModalEdicao() {
+      const id = document.getElementById('editLancId').value;
+      if (id) {
+        fecharModalEditar();
+        excluirLancamento(id);
+      }
+    }
+
+    // ==================== MODAL DE EXTRATO GERAL COMPLETO ====================
+    function abrirModalExtratoCompleto() {
+      document.getElementById('buscaExtrato').value = '';
+      estado.filtroExtratoTipo = 'todos';
+      atualizarBotoesFiltroExtrato();
+      renderizarExtratoCompleto();
+
+      document.getElementById('modalExtratoCompleto').classList.remove('hidden');
+      document.getElementById('modalExtratoCompleto').classList.add('flex');
+    }
+
+    function fecharModalExtratoCompleto() {
+      document.getElementById('modalExtratoCompleto').classList.add('hidden');
+      document.getElementById('modalExtratoCompleto').classList.remove('flex');
+    }
+
+    function filtrarTipoExtrato(tipo) {
+      estado.filtroExtratoTipo = tipo;
+      atualizarBotoesFiltroExtrato();
+      renderizarExtratoCompleto();
+    }
+
+    function atualizarBotoesFiltroExtrato() {
+      const bTodos = document.getElementById('btnExtratoTipoTodos');
+      const bRec = document.getElementById('btnExtratoTipoRec');
+      const bDesp = document.getElementById('btnExtratoTipoDesp');
+
+      [bTodos, bRec, bDesp].forEach(b => b.className = "px-2.5 py-1 rounded bg-[#262626] text-zinc-300 hover:text-white");
+      if (estado.filtroExtratoTipo === 'todos') bTodos.className = "px-2.5 py-1 rounded bg-white text-black font-semibold";
+      if (estado.filtroExtratoTipo === 'recebimento') bRec.className = "px-2.5 py-1 rounded bg-green-600 text-white font-semibold";
+      if (estado.filtroExtratoTipo === 'despesa') bDesp.className = "px-2.5 py-1 rounded bg-red-600 text-white font-semibold";
+    }
+
+    function renderizarExtratoCompleto() {
+      const container = document.getElementById('listaItensExtratoCompleto');
+      const busca = (document.getElementById('buscaExtrato').value || '').toLowerCase().trim();
+      container.innerHTML = '';
+
+      let itens = [...estado.lancamentos];
+
+      if (estado.filtroExtratoTipo !== 'todos') {
+        itens = itens.filter(l => l.tipo === estado.filtroExtratoTipo);
+      }
+
+      if (busca) {
+        itens = itens.filter(l => 
+          (l.descricao || '').toLowerCase().includes(busca) ||
+          (l.categoria || '').toLowerCase().includes(busca)
+        );
+      }
+
+      // Ordena por data decrescente
+      itens.sort((a, b) => {
+        const dateA = normalizarData(a.data).strYMD;
+        const dateB = normalizarData(b.data).strYMD;
+        return dateB.localeCompare(dateA);
+      });
+
+      // Cálculo do subtotal filtrado
+      let totalRec = 0;
+      let totalDesp = 0;
+      itens.forEach(l => {
+        if (l.tipo === 'recebimento') totalRec += (Number(l.valor) || 0);
+        else totalDesp += (Number(l.valor) || 0);
+      });
+      const saldoFiltro = totalRec - totalDesp;
+      document.getElementById('resumoExtratoFiltrado').innerText = `${itens.length} registro(s) • Total: ${formatarMoeda(saldoFiltro)}`;
+
+      if (itens.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-zinc-500 text-xs">Nenhum lançamento encontrado para os filtros selecionados.</div>`;
+        return;
+      }
+
+      itens.forEach(item => {
+        const info = normalizarData(item.data);
+        const isReceita = item.tipo === 'recebimento';
+        const isConciliado = item.status === 'conciliado';
+
+        const row = document.createElement('div');
+        row.className = "p-3 flex items-center justify-between hover:bg-[#18181b] transition gap-2";
+        row.innerHTML = `
+          <div class="flex items-center space-x-2.5 overflow-hidden">
+            <button onclick="toggleConciliacao('${item.id}')" title="${isConciliado ? 'Conciliado' : 'Pendente'}" class="w-6 h-6 shrink-0 rounded border flex items-center justify-center transition ${isConciliado ? 'bg-zinc-800 border-zinc-600 text-white' : 'border-zinc-700 text-transparent hover:text-zinc-500'}">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+            </button>
+
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-xs font-mono text-zinc-400 font-semibold">${info.strBRCompleta}</span>
+                <span class="text-sm font-semibold text-white truncate max-w-[130px] sm:max-w-xs">${item.descricao}</span>
+                <span class="text-[9px] ${isReceita ? 'bg-green-950 text-green-400 border border-green-800' : 'bg-red-950 text-red-400 border border-red-800'} px-1.5 py-0.2 rounded font-mono">${isReceita ? 'Entrada' : 'Saída'}</span>
+              </div>
+              <div class="text-[11px] text-zinc-500 flex items-center gap-1.5 mt-0.5">
+                <span>${item.categoria || 'Geral'}</span>
+                <span>•</span>
+                <span class="${isConciliado ? 'text-zinc-400' : 'text-amber-500 font-medium'}">${isConciliado ? 'Conciliado' : 'Pendente'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2 shrink-0">
+            <span class="font-mono text-xs sm:text-sm font-bold ${isReceita ? 'text-green-500' : 'text-red-500'}">
+              ${isReceita ? '+' : '-'} ${formatarMoeda(item.valor)}
+            </span>
+            <button onclick="abrirModalEditar('${item.id}')" title="Editar" class="px-2 py-1 text-xs bg-[#262626] hover:bg-zinc-700 text-zinc-200 rounded flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              <span class="hidden sm:inline">Editar</span>
+            </button>
+            <button onclick="excluirLancamento('${item.id}')" title="Excluir" class="text-zinc-600 hover:text-red-400 p-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // ==================== RECORRENTES ====================
     function abrirModalNovaRecorrente(tipo) {
       document.getElementById('recTipo').value = tipo;
       document.getElementById('modalTituloRecorrente').innerText = tipo === 'despesa' ? 'Cadastrar Despesa Recorrente' : 'Cadastrar Recebimento Recorrente';
@@ -933,6 +1331,7 @@
       }
     }
 
+    // ==================== SINCRONIZAÇÃO SEGURA COM GOOGLE SHEETS ====================
     async function sincronizarComPlanilha(silencioso = false, forcarEnvio = false) {
       if (!estado.sheetsUrl) {
         if (!silencioso) abrirConfigPlanilha();
@@ -944,29 +1343,40 @@
 
       try {
         if (!forcarEnvio) {
-          // Primeiro busca os dados mais recentes da planilha
+          // Busca os dados da planilha e normaliza todas as datas
           try {
             const getRes = await fetch(estado.sheetsUrl + '?t=' + Date.now());
             const data = await getRes.json();
             if (data && data.success) {
-              if ((data.lancamentos && data.lancamentos.length > 0) || (data.recorrentes && data.recorrentes.length > 0)) {
-                estado.lancamentos = data.lancamentos || [];
-                estado.recorrentes = data.recorrentes || [];
-                salvarDadosLocais();
-                renderizarTudo();
-                if (!silencioso) alert('Dados atualizados da planilha com sucesso!');
-                return;
+              if (data.lancamentos) {
+                // Normaliza todas as datas vindas da planilha
+                estado.lancamentos = data.lancamentos.map(l => {
+                  l.data = normalizarData(l.data).strYMD;
+                  return l;
+                });
               }
+              if (data.recorrentes && data.recorrentes.length > 0) {
+                estado.recorrentes = data.recorrentes;
+              }
+              salvarDadosLocais();
+              renderizarTudo();
+              if (!silencioso) alert('Dados atualizados da planilha com sucesso!');
+              return;
             }
           } catch (e) {
-            console.log('Nenhum dado remoto ou falha na leitura inicial, enviando locais...');
+            console.log('Falha na leitura inicial, enviando dados locais...', e);
           }
         }
 
-        // Envia dados locais para a planilha
+        // Garante que todas as datas locais estejam no formato YYYY-MM-DD antes do envio
+        const lancamentosParaEnvio = estado.lancamentos.map(l => ({
+          ...l,
+          data: normalizarData(l.data).strYMD
+        }));
+
         const payload = {
           action: 'syncAll',
-          lancamentos: estado.lancamentos,
+          lancamentos: lancamentosParaEnvio,
           recorrentes: estado.recorrentes
         };
 
@@ -980,7 +1390,7 @@
         if (!silencioso) alert('Dados sincronizados com o Google Sheets com sucesso!');
       } catch (err) {
         console.warn('Erro ao sincronizar:', err);
-        if (!silencioso) alert('Aviso: Não foi possível conectar ao Google Sheets no momento. Operando em modo offline.');
+        if (!silencioso) alert('Aviso: Operando em modo offline.');
       } finally {
         icon.classList.remove('animate-spin');
       }
