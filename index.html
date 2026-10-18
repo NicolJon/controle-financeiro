@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gestão Financeira</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Finanças">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#0a0a0a',
+              card: '#121212',
+              surface: '#18181b',
+              border: '#262626',
+              green: '#16a34a',
+              red: '#dc2626',
+              muted: '#737373'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0a0a0a;
+      color: #f4f4f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #262626; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #404040; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased select-none bg-[#0a0a0a]">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="sticky top-0 z-30 bg-[#121212] border-b border-[#262626] px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <!-- Botão Menu Lateral Retrátil -->
+      <button onclick="toggleMenu()" class="p-2 text-white hover:bg-[#262626] rounded-md transition focus:outline-none" title="Abrir Menu Lateral">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 bg-white rounded-full"></span>
+        <h1 class="text-base sm:text-lg font-bold tracking-tight text-white uppercase">Finanças</h1>
+      </div>
+    </div>
+
+    <!-- Navegação Mês / Ano e Sincronização -->
+    <div class="flex items-center space-x-1 sm:space-x-2">
+      <button onclick="mudarMes(-1)" class="p-1.5 text-zinc-400 hover:text-white hover:bg-[#262626] rounded">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button onclick="irParaMesAtual()" title="Clique para voltar ao mês atual" id="labelMesAno" class="text-sm font-semibold text-white px-2 py-1 min-w-[125px] text-center hover:bg-[#1f1f23] rounded transition capitalize">
+        Outubro 2026
+      </button>
+      <button onclick="mudarMes(1)" class="p-1.5 text-zinc-400 hover:text-white hover:bg-[#262626] rounded">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+
+      <!-- Botão Sincronizar com Planilha -->
+      <button onclick="sincronizarComPlanilha()" id="btnSync" title="Sincronizar com o Google Sheets" class="ml-1 sm:ml-2 p-1.5 text-zinc-300 hover:text-white hover:bg-[#262626] rounded flex items-center gap-1.5 text-xs border border-[#262626]">
+        <svg id="syncIcon" class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span class="hidden sm:inline">Planilha</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== MENU LATERAL RETRÁTIL ==================== -->
+  <div id="drawerOverlay" onclick="toggleMenu()" class="fixed inset-0 bg-black/75 z-40 hidden transition-opacity"></div>
+  <aside id="drawer" class="fixed top-0 left-0 bottom-0 w-80 max-w-[85vw] bg-[#121212] border-r border-[#262626] z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <!-- Topo do Menu -->
+    <div class="p-4 border-b border-[#262626] flex justify-between items-center bg-[#0a0a0a]">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+        <span class="text-sm font-bold uppercase tracking-wider text-zinc-200">Menu de Gestão</span>
+      </div>
+      <button onclick="toggleMenu()" class="p-1.5 text-zinc-400 hover:text-white rounded">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Opções do Menu -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-6">
+      
+      <!-- DESPESAS RECORRENTES -->
+      <div>
+        <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Despesas Recorrentes</h3>
+        <div class="space-y-1">
+          <button onclick="abrirModalNovaRecorrente('despesa'); toggleMenu();" class="w-full text-left px-3 py-2.5 text-sm text-white hover:bg-[#1e1e24] rounded-lg flex items-center justify-between border border-[#262626]">
+            <span>+ Cadastrar Despesa</span>
+            <span class="text-[10px] bg-red-950 text-red-400 px-1.5 py-0.5 rounded font-mono font-semibold">Com / Sem Valor</span>
+          </button>
+          <button onclick="abrirGerenciadorRecorrentes('despesa'); toggleMenu();" class="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#1e1e24] rounded-lg flex items-center justify-between">
+            <span>Lista de Despesas Recorrentes</span>
+            <span id="badgeCountDespesasRec" class="text-xs bg-[#262626] px-2 py-0.5 rounded text-white font-mono">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- RECEBIMENTOS RECORRENTES -->
+      <div>
+        <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Recebimentos Recorrentes</h3>
+        <div class="space-y-1">
+          <button onclick="abrirModalNovaRecorrente('recebimento'); toggleMenu();" class="w-full text-left px-3 py-2.5 text-sm text-white hover:bg-[#1e1e24] rounded-lg flex items-center justify-between border border-[#262626]">
+            <span>+ Cadastrar Recebimento</span>
+            <span class="text-[10px] bg-green-950 text-green-400 px-1.5 py-0.5 rounded font-mono font-semibold">Entrada Fixa</span>
+          </button>
+          <button onclick="abrirGerenciadorRecorrentes('recebimento'); toggleMenu();" class="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-[#1e1e24] rounded-lg flex items-center justify-between">
+            <span>Lista de Recebimentos Recorrentes</span>
+            <span id="badgeCountRecebimentosRec" class="text-xs bg-[#262626] px-2 py-0.5 rounded text-white font-mono">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- INTEGRAÇÃO GOOGLE SHEETS -->
+      <div class="pt-4 border-t border-[#262626]">
+        <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Google Sheets</h3>
+        <button onclick="abrirConfigPlanilha(); toggleMenu();" class="w-full text-left px-3 py-2.5 text-sm text-zinc-200 hover:bg-[#1e1e24] rounded-lg flex items-center gap-2 border border-[#262626]">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>
+          <span>Conectar URL da Planilha</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Rodapé do Menu -->
+    <div class="p-4 border-t border-[#262626] bg-[#0a0a0a] text-xs text-zinc-500 flex justify-between items-center">
+      <span>Status: <span id="statusModoTexto" class="text-green-500 font-semibold">Local (Offline)</span></span>
+      <button onclick="limparTudo()" class="text-zinc-600 hover:text-red-400 transition">Resetar Dados</button>
+    </div>
+  </aside>
+
+  <!-- ==================== CONTEÚDO PRINCIPAL ==================== -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 space-y-6 pb-28">
+
+    <!-- CARDS DE SALDOS (MÊS E TOTAL) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <!-- Saldo do Mês -->
+      <div class="bg-[#121212] border border-[#262626] p-4 rounded-xl flex flex-col justify-between">
+        <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Saldo do Mês</span>
+        <div id="cardSaldoMes" class="text-xl sm:text-2xl font-bold font-mono mt-1 text-white">R$ 0,00</div>
+        <div class="text-[11px] text-zinc-500 mt-2">Receitas - Despesas do mês</div>
+      </div>
+
+      <!-- Saldo Total (Acumulado) -->
+      <div class="bg-[#121212] border border-[#262626] p-4 rounded-xl flex flex-col justify-between">
+        <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Saldo Total</span>
+        <div id="cardSaldoTotal" class="text-xl sm:text-2xl font-bold font-mono mt-1 text-white">R$ 0,00</div>
+        <div class="text-[11px] text-zinc-500 mt-2">Histórico geral acumulado</div>
+      </div>
+
+      <!-- Total Entradas do Mês -->
+      <div class="bg-[#121212] border border-[#262626] p-4 rounded-xl flex flex-col justify-between">
+        <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Entradas do Mês</span>
+        <div id="cardTotalReceitas" class="text-lg sm:text-xl font-bold font-mono mt-1 text-green-500">R$ 0,00</div>
+        <div class="text-[11px] text-zinc-500 mt-2" id="subRecRealizadas">0 lançamentos</div>
+      </div>
+
+      <!-- Total Saídas do Mês -->
+      <div class="bg-[#121212] border border-[#262626] p-4 rounded-xl flex flex-col justify-between">
+        <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Saídas do Mês</span>
+        <div id="cardTotalDespesas" class="text-lg sm:text-xl font-bold font-mono mt-1 text-red-500">R$ 0,00</div>
+        <div class="text-[11px] text-zinc-500 mt-2" id="subDespRealizadas">0 lançamentos</div>
+      </div>
+    </div>
+
+    <!-- PROJEÇÃO MÊS SEGUINTE -->
+    <div class="bg-[#121212] border border-[#262626] rounded-xl p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-3 border-b border-[#262626] gap-2">
+        <div>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-200">
+            Projeção Mês Seguinte (<span id="nomeProximoMes" class="capitalize">Próximo</span>)
+          </h2>
+          <p class="text-xs text-zinc-500">Projeção estimada a partir dos cadastros recorrentes ativos</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-zinc-400">Resultado Previsto:</span>
+          <span id="projResultado" class="text-sm font-bold font-mono px-2.5 py-1 rounded bg-[#0a0a0a] border border-[#262626]">R$ 0,00</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+        <div class="bg-[#0a0a0a] p-3 rounded-lg border border-[#262626] flex justify-between items-center">
+          <span class="text-zinc-400 text-xs uppercase font-medium">Projeção Recebimento</span>
+          <span id="projRecebimentos" class="font-mono font-bold text-green-500">R$ 0,00</span>
+        </div>
+        <div class="bg-[#0a0a0a] p-3 rounded-lg border border-[#262626] flex justify-between items-center">
+          <span class="text-zinc-400 text-xs uppercase font-medium">Projeção Despesa</span>
+          <span id="projDespesas" class="font-mono font-bold text-red-500">R$ 0,00</span>
+        </div>
+        <div class="bg-[#0a0a0a] p-3 rounded-lg border border-[#262626] flex justify-between items-center">
+          <span class="text-zinc-400 text-xs uppercase font-medium">Projeção Resultado</span>
+          <span id="projResultadoCard" class="font-mono font-bold text-white">R$ 0,00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTÕES PRINCIPAIS DE LANÇAMENTO -->
+    <div class="grid grid-cols-2 gap-3">
+      <!-- Botão Recebimento -->
+      <button onclick="abrirModalLancamento('recebimento')" class="bg-[#16a34a] hover:bg-[#15803d] active:bg-[#166534] text-white p-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span>+ Recebimento</span>
+      </button>
+
+      <!-- Botão Despesa -->
+      <button onclick="abrirModalLancamento('despesa')" class="bg-[#dc2626] hover:bg-[#b91c1c] active:bg-[#991b1b] text-white p-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+        <span>- Despesa</span>
+      </button>
+    </div>
+
+    <!-- EXTRATO / LANÇAMENTOS E CONCILIAÇÃO -->
+    <div class="bg-[#121212] border border-[#262626] rounded-xl overflow-hidden">
+      <div class="p-4 border-b border-[#262626] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-200">Lançamentos do Mês</h2>
+          <span id="badgeTotalLancamentos" class="text-xs bg-[#262626] text-zinc-300 px-2 py-0.5 rounded-full font-mono">0</span>
+        </div>
+
+        <!-- Filtros Rápidos de Situação -->
+        <div class="flex items-center gap-2 text-xs">
+          <button onclick="filtrarStatus('todos')" id="filterTodos" class="px-2.5 py-1 rounded bg-white text-black font-semibold">Todos</button>
+          <button onclick="filtrarStatus('conciliado')" id="filterConciliado" class="px-2.5 py-1 rounded bg-[#262626] text-zinc-300 hover:text-white">Conciliados</button>
+          <button onclick="filtrarStatus('pendente')" id="filterPendente" class="px-2.5 py-1 rounded bg-[#262626] text-zinc-300 hover:text-white">Pendentes</button>
+        </div>
+      </div>
+
+      <!-- Lista de Lançamentos -->
+      <div id="listaLancamentos" class="divide-y divide-[#262626]"></div>
+
+      <!-- Estado Vazio -->
+      <div id="estadoVazio" class="hidden p-8 text-center text-zinc-500 text-sm">
+        Nenhum lançamento registrado neste mês. Utilize os botões acima para lançar recebimentos ou despesas.
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== MODAL: LANÇAMENTO (RECEBIMENTO / DESPESA) ==================== -->
+  <div id="modalLancamento" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4">
+    <div class="bg-[#121212] border border-[#262626] rounded-xl max-w-md w-full overflow-hidden shadow-2xl">
+      <div id="modalHeaderLancamento" class="p-4 border-b border-[#262626] flex justify-between items-center bg-[#0a0a0a]">
+        <h3 id="modalTituloLancamento" class="text-base font-bold text-white uppercase tracking-wider">Novo Lançamento</h3>
+        <button onclick="fecharModalLancamento()" class="text-zinc-400 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="formLancamento" onsubmit="salvarLancamento(event)" class="p-4 space-y-4">
+        <input type="hidden" id="lancTipo" value="despesa">
+
+        <!-- Alternar entre Cadastrado (dropdown) e Manual -->
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Origem do Lançamento</label>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <button type="button" onclick="setOrigemLancamento('cadastrado')" id="btnOrigemCadastrado" class="py-2 text-xs font-semibold rounded-lg border border-[#262626] bg-[#262626] text-white">Pré-Cadastrado</button>
+            <button type="button" onclick="setOrigemLancamento('manual')" id="btnOrigemManual" class="py-2 text-xs font-semibold rounded-lg border border-[#262626] text-zinc-400">Lançamento Manual</button>
+          </div>
+
+          <!-- Dropdown de Cadastrados -->
+          <div id="campoCadastrado" class="space-y-1">
+            <select id="selectCadastrado" onchange="selecionouRecorrente()" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+              <option value="">Selecione um item pré-cadastrado...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Descrição -->
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Descrição</label>
+          <input type="text" id="lancDescricao" required placeholder="Ex: Supermercado, Salário, Internet" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+        </div>
+
+        <!-- Valor e Categoria -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Valor (R$)</label>
+            <input type="number" step="0.01" min="0.01" id="lancValor" required placeholder="0,00" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white font-mono focus:outline-none focus:border-zinc-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Categoria</label>
+            <input type="text" id="lancCategoria" placeholder="Ex: Moradia, Alimentação" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+          </div>
+        </div>
+
+        <!-- Data do Lançamento e Situação -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Data</label>
+            <input type="date" id="lancData" required class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Situação</label>
+            <select id="lancStatus" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+              <option value="conciliado">Realizado / Pago</option>
+              <option value="pendente">Pendente</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex justify-end space-x-2 pt-3 border-t border-[#262626]">
+          <button type="button" onclick="fecharModalLancamento()" class="px-4 py-2 text-sm text-zinc-400 hover:text-white">Cancelar</button>
+          <button type="submit" id="btnSalvarLanc" class="px-5 py-2 text-sm font-bold bg-white text-black hover:bg-zinc-200 rounded-lg">Salvar Lançamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CADASTRO RECORRENTE ==================== -->
+  <div id="modalRecorrente" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4">
+    <div class="bg-[#121212] border border-[#262626] rounded-xl max-w-md w-full overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-[#262626] flex justify-between items-center bg-[#0a0a0a]">
+        <h3 id="modalTituloRecorrente" class="text-base font-bold text-white uppercase tracking-wider">Cadastrar Recorrente</h3>
+        <button onclick="fecharModalRecorrente()" class="text-zinc-400 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="formRecorrente" onsubmit="salvarRecorrente(event)" class="p-4 space-y-4">
+        <input type="hidden" id="recTipo" value="despesa">
+
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Descrição</label>
+          <input type="text" id="recDescricao" required placeholder="Ex: Aluguel, Academia, Salário Empresa" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+        </div>
+
+        <!-- Checkbox: Sem Valor Fixo (Com ou Sem Valor) -->
+        <div id="containerSemValor" class="flex items-center space-x-2 py-1">
+          <input type="checkbox" id="recSemValorFixo" onchange="toggleValorFixo()" class="w-4 h-4 rounded bg-[#0a0a0a] border-[#262626] text-white focus:ring-0">
+          <label for="recSemValorFixo" class="text-xs text-zinc-300">Despesa sem valor fixo (o valor varia a cada mês, ex: Energia, Cartão)</label>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div id="campoRecValor">
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Valor Previsto (R$)</label>
+            <input type="number" step="0.01" min="0" id="recValor" placeholder="0,00" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white font-mono focus:outline-none focus:border-zinc-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Dia do Vencimento</label>
+            <input type="number" min="1" max="31" id="recDiaVencimento" required value="5" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white font-mono focus:outline-none focus:border-zinc-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Categoria</label>
+          <input type="text" id="recCategoria" placeholder="Ex: Moradia, Serviços, Renda" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-zinc-400">
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-[#262626]">
+          <button type="button" onclick="fecharModalRecorrente()" class="px-4 py-2 text-sm text-zinc-400 hover:text-white">Cancelar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-bold bg-white text-black hover:bg-zinc-200 rounded-lg">Salvar Cadastro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: GERENCIADOR DE RECORRENTES ==================== -->
+  <div id="modalListaRecorrentes" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4">
+    <div class="bg-[#121212] border border-[#262626] rounded-xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-[#262626] flex justify-between items-center bg-[#0a0a0a]">
+        <h3 id="tituloListaRecorrentes" class="text-base font-bold text-white uppercase tracking-wider">Recorrentes Cadastradas</h3>
+        <button onclick="document.getElementById('modalListaRecorrentes').classList.add('hidden'); document.getElementById('modalListaRecorrentes').classList.remove('flex');" class="text-zinc-400 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div id="itensListaRecorrentes" class="flex-1 overflow-y-auto divide-y divide-[#262626] p-2"></div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CONFIGURAÇÃO PLANILHA ==================== -->
+  <div id="modalConfigPlanilha" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4">
+    <div class="bg-[#121212] border border-[#262626] rounded-xl max-w-md w-full overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-[#262626] flex justify-between items-center bg-[#0a0a0a]">
+        <h3 class="text-base font-bold text-white uppercase tracking-wider">Google Sheets API</h3>
+        <button onclick="fecharConfigPlanilha()" class="text-zinc-400 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-4 text-sm">
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Cole a URL gerada no Google Apps Script (Implantar > Nova Implantação > App da Web):
+        </p>
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">URL do Web App</label>
+          <input type="url" id="inputSheetsUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-[#0a0a0a] border border-[#262626] rounded-lg p-2.5 text-xs text-white font-mono focus:outline-none focus:border-zinc-400">
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-[#262626]">
+          <button type="button" onclick="fecharConfigPlanilha()" class="px-4 py-2 text-sm text-zinc-400 hover:text-white">Fechar</button>
+          <button type="button" onclick="salvarConfigPlanilha()" class="px-5 py-2 text-sm font-bold bg-white text-black hover:bg-zinc-200 rounded-lg">Salvar e Conectar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LÓGICA E JAVASCRIPT ==================== -->
+  <script>
+    // ESTADO DA APLICAÇÃO
+    const estado = {
+      mesVisualizado: new Date().getMonth(),
+      anoVisualizado: new Date().getFullYear(),
+      filtroStatus: 'todos',
+      lancamentos: [],
+      recorrentes: [],
+      sheetsUrl: localStorage.getItem('financas_sheets_url') || 'https://script.google.com/macros/s/AKfycbwY5Pyyv_1IsgNW8YU6ExYqZFylYnviMgHRKzytW8DHQiIb4735o5GuKTDvqdyABw4T/exec',
+      modoOrigem: 'cadastrado'
+    };
+
+    const MESES = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      carregarDadosLocais();
+      definirDataPadrao();
+      renderizarTudo();
+
+      if (estado.sheetsUrl) {
+        document.getElementById('statusModoTexto').innerText = 'Conectado à Planilha';
+        sincronizarComPlanilha(true);
+      }
+
+      // Registro do Service Worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW register error:', err));
+      }
+    });
+
+    function carregarDadosLocais() {
+      const lancSalvos = localStorage.getItem('financas_lancamentos');
+      const recSalvos = localStorage.getItem('financas_recorrentes');
+      if (lancSalvos) estado.lancamentos = JSON.parse(lancSalvos);
+      if (recSalvos) estado.recorrentes = JSON.parse(recSalvos);
+
+      if (estado.recorrentes.length === 0 && estado.lancamentos.length === 0) {
+        // Exemplo inicial de recorrentes
+        estado.recorrentes = [
+          { id: 'R_1', tipo: 'recebimento', descricao: 'Salário', categoria: 'Renda', valor: 5500, semValorFixo: false, diaVencimento: 5, ativo: true },
+          { id: 'R_2', tipo: 'despesa', descricao: 'Aluguel', categoria: 'Moradia', valor: 1800, semValorFixo: false, diaVencimento: 10, ativo: true },
+          { id: 'R_3', tipo: 'despesa', descricao: 'Conta de Luz', categoria: 'Contas', valor: 220, semValorFixo: true, diaVencimento: 15, ativo: true },
+          { id: 'R_4', tipo: 'despesa', descricao: 'Internet', categoria: 'Serviços', valor: 130, semValorFixo: false, diaVencimento: 20, ativo: true }
+        ];
+        salvarDadosLocais();
+      }
+    }
+
+    function salvarDadosLocais() {
+      localStorage.setItem('financas_lancamentos', JSON.stringify(estado.lancamentos));
+      localStorage.setItem('financas_recorrentes', JSON.stringify(estado.recorrentes));
+    }
+
+    function definirDataPadrao() {
+      const hoje = new Date().toISOString().split('T')[0];
+      document.getElementById('lancData').value = hoje;
+    }
+
+    function formatarMoeda(valor) {
+      return (Number(valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function mudarMes(delta) {
+      estado.mesVisualizado += delta;
+      if (estado.mesVisualizado > 11) {
+        estado.mesVisualizado = 0;
+        estado.anoVisualizado++;
+      } else if (estado.mesVisualizado < 0) {
+        estado.mesVisualizado = 11;
+        estado.anoVisualizado--;
+      }
+      renderizarTudo();
+    }
+
+    function irParaMesAtual() {
+      estado.mesVisualizado = new Date().getMonth();
+      estado.anoVisualizado = new Date().getFullYear();
+      renderizarTudo();
+    }
+
+    function filtrarStatus(status) {
+      estado.filtroStatus = status;
+      ['filterTodos', 'filterConciliado', 'filterPendente'].forEach(id => {
+        const btn = document.getElementById(id);
+        btn.className = "px-2.5 py-1 rounded bg-[#262626] text-zinc-300 hover:text-white";
+      });
+      const ativo = status === 'todos' ? 'filterTodos' : (status === 'conciliado' ? 'filterConciliado' : 'filterPendente');
+      document.getElementById(ativo).className = "px-2.5 py-1 rounded bg-white text-black font-semibold";
+      renderizarLancamentos();
+    }
+
+    function renderizarTudo() {
+      document.getElementById('labelMesAno').innerText = `${MESES[estado.mesVisualizado]} ${estado.anoVisualizado}`;
+
+      const lancamentosMes = estado.lancamentos.filter(l => {
+        const d = new Date(l.data + 'T00:00:00');
+        return d.getMonth() === estado.mesVisualizado && d.getFullYear() === estado.anoVisualizado;
+      });
+
+      let recMes = 0;
+      let despMes = 0;
+      let countRec = 0;
+      let countDesp = 0;
+
+      lancamentosMes.forEach(l => {
+        if (l.tipo === 'recebimento') {
+          recMes += l.valor;
+          countRec++;
+        } else {
+          despMes += l.valor;
+          countDesp++;
+        }
+      });
+
+      const saldoMes = recMes - despMes;
+      const elSaldoMes = document.getElementById('cardSaldoMes');
+      elSaldoMes.innerText = formatarMoeda(saldoMes);
+      elSaldoMes.className = `text-xl sm:text-2xl font-bold font-mono mt-1 ${saldoMes >= 0 ? 'text-green-500' : 'text-red-500'}`;
+
+      document.getElementById('cardTotalReceitas').innerText = formatarMoeda(recMes);
+      document.getElementById('subRecRealizadas').innerText = `${countRec} lançamento(s)`;
+
+      document.getElementById('cardTotalDespesas').innerText = formatarMoeda(despMes);
+      document.getElementById('subDespRealizadas').innerText = `${countDesp} lançamento(s)`;
+
+      let saldoTotalAcumulado = 0;
+      estado.lancamentos.forEach(l => {
+        if (l.tipo === 'recebimento') saldoTotalAcumulado += l.valor;
+        else saldoTotalAcumulado -= l.valor;
+      });
+      const elSaldoTotal = document.getElementById('cardSaldoTotal');
+      elSaldoTotal.innerText = formatarMoeda(saldoTotalAcumulado);
+      elSaldoTotal.className = `text-xl sm:text-2xl font-bold font-mono mt-1 ${saldoTotalAcumulado >= 0 ? 'text-white' : 'text-red-500'}`;
+
+      calcularProjecaoMesSeguinte();
+
+      document.getElementById('badgeCountDespesasRec').innerText = estado.recorrentes.filter(r => r.tipo === 'despesa' && r.ativo).length;
+      document.getElementById('badgeCountRecebimentosRec').innerText = estado.recorrentes.filter(r => r.tipo === 'recebimento' && r.ativo).length;
+
+      renderizarLancamentos();
+    }
+
+    function calcularProjecaoMesSeguinte() {
+      let mesSeguinte = estado.mesVisualizado + 1;
+      let anoSeguinte = estado.anoVisualizado;
+      if (mesSeguinte > 11) {
+        mesSeguinte = 0;
+        anoSeguinte++;
+      }
+      document.getElementById('nomeProximoMes').innerText = `${MESES[mesSeguinte]}`;
+
+      let projReceitas = 0;
+      let projDespesas = 0;
+
+      estado.recorrentes.filter(r => r.ativo).forEach(r => {
+        if (r.tipo === 'recebimento') {
+          projReceitas += (r.valor || 0);
+        } else if (r.tipo === 'despesa') {
+          projDespesas += (r.valor || 0);
+        }
+      });
+
+      const projResultado = projReceitas - projDespesas;
+
+      document.getElementById('projRecebimentos').innerText = formatarMoeda(projReceitas);
+      document.getElementById('projDespesas').innerText = formatarMoeda(projDespesas);
+
+      const elResultado = document.getElementById('projResultado');
+      const elResultadoCard = document.getElementById('projResultadoCard');
+      elResultado.innerText = formatarMoeda(projResultado);
+      elResultadoCard.innerText = formatarMoeda(projResultado);
+
+      if (projResultado >= 0) {
+        elResultado.className = "text-sm font-bold font-mono px-2.5 py-1 rounded bg-[#0a0a0a] border border-[#262626] text-green-500";
+        elResultadoCard.className = "font-mono font-bold text-green-500";
+      } else {
+        elResultado.className = "text-sm font-bold font-mono px-2.5 py-1 rounded bg-[#0a0a0a] border border-[#262626] text-red-500";
+        elResultadoCard.className = "font-mono font-bold text-red-500";
+      }
+    }
+
+    function renderizarLancamentos() {
+      const container = document.getElementById('listaLancamentos');
+      const estadoVazio = document.getElementById('estadoVazio');
+      container.innerHTML = '';
+
+      let itens = estado.lancamentos.filter(l => {
+        const d = new Date(l.data + 'T00:00:00');
+        return d.getMonth() === estado.mesVisualizado && d.getFullYear() === estado.anoVisualizado;
+      });
+
+      if (estado.filtroStatus !== 'todos') {
+        itens = itens.filter(l => l.status === estado.filtroStatus);
+      }
+
+      itens.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+      document.getElementById('badgeTotalLancamentos').innerText = itens.length;
+
+      if (itens.length === 0) {
+        estadoVazio.classList.remove('hidden');
+        return;
+      }
+      estadoVazio.classList.add('hidden');
+
+      itens.forEach(item => {
+        const dia = item.data.split('-')[2];
+        const isReceita = item.tipo === 'recebimento';
+        const isConciliado = item.status === 'conciliado';
+
+        const row = document.createElement('div');
+        row.className = "p-3.5 sm:px-4 flex items-center justify-between hover:bg-[#18181b] transition";
+        row.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <button onclick="toggleConciliacao('${item.id}')" title="${isConciliado ? 'Conciliado (clique para marcar pendente)' : 'Pendente (clique para conciliar)'}" class="w-7 h-7 rounded border flex items-center justify-center transition ${isConciliado ? 'bg-zinc-800 border-zinc-600 text-white' : 'border-zinc-700 text-transparent hover:text-zinc-600'}">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+            </button>
+
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono text-zinc-500 font-semibold">${dia}/${item.data.split('-')[1]}</span>
+                <span class="text-sm font-semibold text-white">${item.descricao}</span>
+                ${item.origemRecorrente ? '<span class="text-[10px] bg-[#262626] text-zinc-400 px-1 rounded">recorrente</span>' : ''}
+              </div>
+              <div class="text-xs text-zinc-500 flex items-center gap-2 mt-0.5">
+                <span>${item.categoria || 'Geral'}</span>
+                <span>•</span>
+                <span class="${isConciliado ? 'text-zinc-400' : 'text-amber-500 font-medium'}">${isConciliado ? 'Conciliado' : 'Pendente'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <span class="font-mono text-sm sm:text-base font-bold ${isReceita ? 'text-green-500' : 'text-red-500'}">
+              ${isReceita ? '+' : '-'} ${formatarMoeda(item.valor)}
+            </span>
+            <button onclick="excluirLancamento('${item.id}')" title="Excluir Lançamento" class="text-zinc-600 hover:text-red-400 p-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleConciliacao(id) {
+      const item = estado.lancamentos.find(l => l.id === id);
+      if (item) {
+        item.status = item.status === 'conciliado' ? 'pendente' : 'conciliado';
+        salvarDadosLocais();
+        renderizarTudo();
+        autoSyncSilencioso();
+      }
+    }
+
+    function excluirLancamento(id) {
+      if (confirm('Tem certeza que deseja remover este lançamento?')) {
+        estado.lancamentos = estado.lancamentos.filter(l => l.id !== id);
+        salvarDadosLocais();
+        renderizarTudo();
+        autoSyncSilencioso();
+      }
+    }
+
+    function abrirModalLancamento(tipo) {
+      document.getElementById('lancTipo').value = tipo;
+      const titulo = document.getElementById('modalTituloLancamento');
+      const btnSalvar = document.getElementById('btnSalvarLanc');
+
+      if (tipo === 'recebimento') {
+        titulo.innerText = 'Lançar Recebimento';
+        btnSalvar.className = "px-5 py-2 text-sm font-bold bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg";
+      } else {
+        titulo.innerText = 'Lançar Despesa';
+        btnSalvar.className = "px-5 py-2 text-sm font-bold bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded-lg";
+      }
+
+      popularDropdownRecorrentes(tipo);
+      setOrigemLancamento('cadastrado');
+      document.getElementById('modalLancamento').classList.remove('hidden');
+      document.getElementById('modalLancamento').classList.add('flex');
+    }
+
+    function fecharModalLancamento() {
+      document.getElementById('modalLancamento').classList.add('hidden');
+      document.getElementById('modalLancamento').classList.remove('flex');
+      document.getElementById('formLancamento').reset();
+      definirDataPadrao();
+    }
+
+    function setOrigemLancamento(modo) {
+      estado.modoOrigem = modo;
+      const btnCad = document.getElementById('btnOrigemCadastrado');
+      const btnMan = document.getElementById('btnOrigemManual');
+      const campoCad = document.getElementById('campoCadastrado');
+
+      if (modo === 'cadastrado') {
+        btnCad.className = "py-2 text-xs font-semibold rounded-lg border border-[#262626] bg-[#262626] text-white";
+        btnMan.className = "py-2 text-xs font-semibold rounded-lg border border-[#262626] text-zinc-400";
+        campoCad.classList.remove('hidden');
+      } else {
+        btnMan.className = "py-2 text-xs font-semibold rounded-lg border border-[#262626] bg-[#262626] text-white";
+        btnCad.className = "py-2 text-xs font-semibold rounded-lg border border-[#262626] text-zinc-400";
+        campoCad.classList.add('hidden');
+        document.getElementById('selectCadastrado').value = "";
+      }
+    }
+
+    function popularDropdownRecorrentes(tipo) {
+      const select = document.getElementById('selectCadastrado');
+      select.innerHTML = '<option value="">-- Selecione da lista pré-cadastrada --</option>';
+
+      const itens = estado.recorrentes.filter(r => r.tipo === tipo && r.ativo);
+      itens.forEach(r => {
+        const infoValor = r.semValorFixo ? '(Sem valor fixo)' : `R$ ${r.valor.toFixed(2)}`;
+        select.innerHTML += `<option value="${r.id}">${r.descricao} - ${infoValor}</option>`;
+      });
+    }
+
+    function selecionouRecorrente() {
+      const id = document.getElementById('selectCadastrado').value;
+      if (!id) return;
+      const rec = estado.recorrentes.find(r => r.id === id);
+      if (rec) {
+        document.getElementById('lancDescricao').value = rec.descricao;
+        document.getElementById('lancCategoria').value = rec.categoria || '';
+        if (!rec.semValorFixo && rec.valor > 0) {
+          document.getElementById('lancValor').value = rec.valor;
+        } else {
+          document.getElementById('lancValor').value = '';
+          document.getElementById('lancValor').focus();
+        }
+      }
+    }
+
+    function salvarLancamento(event) {
+      event.preventDefault();
+      const tipo = document.getElementById('lancTipo').value;
+      const descricao = document.getElementById('lancDescricao').value.trim();
+      const valor = parseFloat(document.getElementById('lancValor').value);
+      const categoria = document.getElementById('lancCategoria').value.trim();
+      const data = document.getElementById('lancData').value;
+      const status = document.getElementById('lancStatus').value;
+      const recId = document.getElementById('selectCadastrado').value;
+
+      if (!descricao || isNaN(valor) || valor <= 0 || !data) {
+        alert('Por favor, preencha todos os campos obrigatórios.');
+        return;
+      }
+
+      const novoLancamento = {
+        id: 'L_' + Date.now(),
+        data,
+        tipo,
+        descricao,
+        categoria,
+        valor,
+        status,
+        origemRecorrente: recId || ''
+      };
+
+      estado.lancamentos.push(novoLancamento);
+      salvarDadosLocais();
+      fecharModalLancamento();
+      renderizarTudo();
+      autoSyncSilencioso();
+    }
+
+    function abrirModalNovaRecorrente(tipo) {
+      document.getElementById('recTipo').value = tipo;
+      document.getElementById('modalTituloRecorrente').innerText = tipo === 'despesa' ? 'Cadastrar Despesa Recorrente' : 'Cadastrar Recebimento Recorrente';
+
+      const containerSemValor = document.getElementById('containerSemValor');
+      if (tipo === 'despesa') {
+        containerSemValor.classList.remove('hidden');
+      } else {
+        containerSemValor.classList.add('hidden');
+        document.getElementById('recSemValorFixo').checked = false;
+      }
+      toggleValorFixo();
+
+      document.getElementById('modalRecorrente').classList.remove('hidden');
+      document.getElementById('modalRecorrente').classList.add('flex');
+    }
+
+    function fecharModalRecorrente() {
+      document.getElementById('modalRecorrente').classList.add('hidden');
+      document.getElementById('modalRecorrente').classList.remove('flex');
+      document.getElementById('formRecorrente').reset();
+    }
+
+    function toggleValorFixo() {
+      const semValor = document.getElementById('recSemValorFixo').checked;
+      const campoValor = document.getElementById('campoRecValor');
+      if (semValor) {
+        campoValor.classList.add('opacity-40');
+        document.getElementById('recValor').required = false;
+      } else {
+        campoValor.classList.remove('opacity-40');
+        document.getElementById('recValor').required = true;
+      }
+    }
+
+    function salvarRecorrente(event) {
+      event.preventDefault();
+      const tipo = document.getElementById('recTipo').value;
+      const descricao = document.getElementById('recDescricao').value.trim();
+      const semValorFixo = document.getElementById('recSemValorFixo').checked;
+      const valor = semValorFixo ? (parseFloat(document.getElementById('recValor').value) || 0) : parseFloat(document.getElementById('recValor').value);
+      const diaVencimento = parseInt(document.getElementById('recDiaVencimento').value) || 1;
+      const categoria = document.getElementById('recCategoria').value.trim();
+
+      const novaRec = {
+        id: 'R_' + Date.now(),
+        tipo,
+        descricao,
+        categoria,
+        valor: isNaN(valor) ? 0 : valor,
+        semValorFixo,
+        diaVencimento,
+        ativo: true
+      };
+
+      estado.recorrentes.push(novaRec);
+      salvarDadosLocais();
+      fecharModalRecorrente();
+      renderizarTudo();
+      autoSyncSilencioso();
+    }
+
+    function abrirGerenciadorRecorrentes(tipo) {
+      const modal = document.getElementById('modalListaRecorrentes');
+      const titulo = document.getElementById('tituloListaRecorrentes');
+      const container = document.getElementById('itensListaRecorrentes');
+
+      titulo.innerText = tipo === 'despesa' ? 'Despesas Recorrentes Cadastradas' : 'Recebimentos Recorrentes Cadastrados';
+      container.innerHTML = '';
+
+      const itens = estado.recorrentes.filter(r => r.tipo === tipo);
+
+      if (itens.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-zinc-500 text-sm">Nenhum item cadastrado nesta categoria.</div>';
+      } else {
+        itens.forEach(r => {
+          const div = document.createElement('div');
+          div.className = "p-3 flex items-center justify-between hover:bg-[#18181b]";
+          div.innerHTML = `
+            <div>
+              <div class="text-sm font-semibold text-white">${r.descricao}</div>
+              <div class="text-xs text-zinc-500">
+                Dia: ${r.diaVencimento} • ${r.semValorFixo ? 'Sem valor fixo (variável)' : formatarMoeda(r.valor)} • ${r.categoria || 'Geral'}
+              </div>
+            </div>
+            <button onclick="removerRecorrente('${r.id}', '${tipo}')" class="text-zinc-600 hover:text-red-400 p-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function removerRecorrente(id, tipo) {
+      if (confirm('Deseja excluir este item das recorrentes?')) {
+        estado.recorrentes = estado.recorrentes.filter(r => r.id !== id);
+        salvarDadosLocais();
+        abrirGerenciadorRecorrentes(tipo);
+        renderizarTudo();
+        autoSyncSilencioso();
+      }
+    }
+
+    function toggleMenu() {
+      const drawer = document.getElementById('drawer');
+      const overlay = document.getElementById('drawerOverlay');
+      const isOpen = !drawer.classList.contains('-translate-x-full');
+
+      if (isOpen) {
+        drawer.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      } else {
+        drawer.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      }
+    }
+
+    function abrirConfigPlanilha() {
+      document.getElementById('inputSheetsUrl').value = estado.sheetsUrl;
+      document.getElementById('modalConfigPlanilha').classList.remove('hidden');
+      document.getElementById('modalConfigPlanilha').classList.add('flex');
+    }
+
+    function fecharConfigPlanilha() {
+      document.getElementById('modalConfigPlanilha').classList.add('hidden');
+      document.getElementById('modalConfigPlanilha').classList.remove('flex');
+    }
+
+    function salvarConfigPlanilha() {
+      const url = document.getElementById('inputSheetsUrl').value.trim();
+      estado.sheetsUrl = url;
+      localStorage.setItem('financas_sheets_url', url);
+      fecharConfigPlanilha();
+      if (url) {
+        document.getElementById('statusModoTexto').innerText = 'Conectado à Planilha';
+        sincronizarComPlanilha();
+      } else {
+        document.getElementById('statusModoTexto').innerText = 'Local (Offline)';
+        alert('Modo offline / local ativado.');
+      }
+    }
+
+    async function sincronizarComPlanilha(silencioso = false, forcarEnvio = false) {
+      if (!estado.sheetsUrl) {
+        if (!silencioso) abrirConfigPlanilha();
+        return;
+      }
+
+      const icon = document.getElementById('syncIcon');
+      icon.classList.add('animate-spin');
+
+      try {
+        if (!forcarEnvio) {
+          // Primeiro busca os dados mais recentes da planilha
+          try {
+            const getRes = await fetch(estado.sheetsUrl + '?t=' + Date.now());
+            const data = await getRes.json();
+            if (data && data.success) {
+              if ((data.lancamentos && data.lancamentos.length > 0) || (data.recorrentes && data.recorrentes.length > 0)) {
+                estado.lancamentos = data.lancamentos || [];
+                estado.recorrentes = data.recorrentes || [];
+                salvarDadosLocais();
+                renderizarTudo();
+                if (!silencioso) alert('Dados atualizados da planilha com sucesso!');
+                return;
+              }
+            }
+          } catch (e) {
+            console.log('Nenhum dado remoto ou falha na leitura inicial, enviando locais...');
+          }
+        }
+
+        // Envia dados locais para a planilha
+        const payload = {
+          action: 'syncAll',
+          lancamentos: estado.lancamentos,
+          recorrentes: estado.recorrentes
+        };
+
+        await fetch(estado.sheetsUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!silencioso) alert('Dados sincronizados com o Google Sheets com sucesso!');
+      } catch (err) {
+        console.warn('Erro ao sincronizar:', err);
+        if (!silencioso) alert('Aviso: Não foi possível conectar ao Google Sheets no momento. Operando em modo offline.');
+      } finally {
+        icon.classList.remove('animate-spin');
+      }
+    }
+
+    function autoSyncSilencioso() {
+      if (estado.sheetsUrl) {
+        sincronizarComPlanilha(true, true);
+      }
+    }
+
+    function limparTudo() {
+      if (confirm('Deseja realmente apagar todos os dados locais?')) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+  </script>
+</body>
+</html>
