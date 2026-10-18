@@ -11,6 +11,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Finanças">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -656,7 +659,18 @@
       }
 
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW register error:', err));
+        navigator.serviceWorker.register('./sw.js?v=3').then(reg => {
+          reg.update();
+        }).catch(err => console.log('SW register error:', err));
+      }
+
+      // Limpeza forçada de caches legados para nunca travar em versões antigas
+      if ('caches' in window) {
+        caches.keys().then(keys => {
+          keys.forEach(k => {
+            if (k !== 'financas-pwa-v3') caches.delete(k);
+          });
+        });
       }
     });
 
